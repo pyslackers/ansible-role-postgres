@@ -14,7 +14,7 @@
     - autopostgresqlbackup
 
 - name: "create database user {{ item.key }}"
-  become: yes
+  become: true
   become_user: postgres
   postgresql_user:
     name: "{{ item.key }}"
@@ -35,7 +35,7 @@
   when: gen_locale.changed
 
 - name: "create database {{ item.value.database }}"
-  become: yes
+  become: true
   become_user: postgres
   postgresql_db:
     name: "{{ item.value.database }}"
