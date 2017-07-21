@@ -17,7 +17,8 @@ install:
   - pip --version
   - python --version
   - ansible --version
-  - "printf '[defaults]\nroles_path = ../' > ansible.cfg"
+  - "printf '[defaults]\nroles_path = ../\nremote_tmp = ./tmp' > ansible.cfg"
+  - mkdir -p ./tmp
 
 script:
   - ansible-lint tasks/main.yml
@@ -28,3 +29,4 @@ script:
     | grep -q 'changed=0.*failed=0'
     && (echo 'Idempotence test: pass' && exit 0)
     || (echo 'Idempotence test: fail' && exit 1)
+  - curl localhost
