@@ -1,0 +1,6 @@
+---
+- hosts: localhost
+  vars_files:
+    - example-vars.yml
+  roles:
+    - ansible-role-postgres

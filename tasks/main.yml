@@ -1,0 +1,54 @@
+---
+- name: install packages
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+    force: yes
+  with_items:
+    - postgresql-9.6
+    - postgresql-client-9.6
+    - postgresql-contrib-9.6
+    - pgtop
+    - python-psycopg2
+    - python-passlib
+    - autopostgresqlbackup
+
+- name: "create database user {{ item.key }}"
+  become: yes
+  become_user: postgres
+  postgresql_user:
+    name: "{{ item.key }}"
+    password: "{{ item.value.password }}"
+    role_attr_flags: "{{ item.value.roles | default(postgres_default_roles) }}"
+    state: present
+  with_dict: "{{ postgres_users }}"
+
+- name: generate locales
+  locale_gen:
+    name: "{{ postgres_locale }}"
+  register: gen_locale
+
+- name: restart postgres for local
+  systemd:
+    name: postgresql.service
+    state: restarted
+  when: gen_locale.changed
+
+- name: "create database {{ item.value.database }}"
+  become: yes
+  become_user: postgres
+  postgresql_db:
+    name: "{{ item.value.database }}"
+    encoding: UTF-8
+    lc_collate: "{{ postgres_locale }}"
+    lc_ctype: "{{ postgres_locale }}"
+    state: present
+    owner: "{{ item.key }}"
+    template: template0
+  with_dict: "{{ postgres_users }}"
+
+- name: enable postgres
+  systemd:
+    enabled: yes
+    name: postgresql.service
+    state: started
