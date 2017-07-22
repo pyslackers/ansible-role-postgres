@@ -19,11 +19,11 @@
     - postgresql-client-9.6
     - postgresql-contrib-9.6
     - pgtop
-    - python-psycopg2
-    - python-passlib
+    - python3-psycopg2
+    - python3-passlib
     - autopostgresqlbackup
 
-- name: "create database user {{ item.key }}"
+- name: "create database users"
   become: true
   become_user: postgres
   postgresql_user:
@@ -44,11 +44,11 @@
     state: restarted
   when: gen_locale.changed
 
-- name: "create database {{ item.value.database }}"
+- name: "create databases"
   become: true
   become_user: postgres
   postgresql_db:
-    name: "{{ item.value.database }}"
+    name: "{{ item.value.database | default(item.key) }}"
     encoding: UTF-8
     lc_collate: "{{ postgres_locale }}"
     lc_ctype: "{{ postgres_locale }}"
