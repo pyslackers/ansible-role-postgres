@@ -1,7 +1,7 @@
 ---
 postgres_locale: en_US.UTF-8
 postgres_default_roles:
-  - 'NOSUPERUSER'
-  - 'NOCREATEDB'
-  - 'NOCREATEROLE'
-  - 'NOLOGIN'
+  - NOSUPERUSER
+  - NOCREATEDB
+  - NOCREATEROLE
+  - NOLOGIN

@@ -29,7 +29,7 @@
   postgresql_user:
     name: "{{ item.key }}"
     password: "{{ item.value.password }}"
-    role_attr_flags: "{{ item.value.roles | default(postgres_default_roles) }}"
+    role_attr_flags: "{{ item.value.roles | default(postgres_default_roles) | join(',') }}"
     state: present
   with_dict: "{{ postgres_users }}"
 
