@@ -1,7 +1,8 @@
 ---
 postgres_locale: en_US.UTF-8
+# The roles a user will get by default if the
+# play doesn't define them.
 postgres_default_roles:
   - NOSUPERUSER
   - NOCREATEDB
   - NOCREATEROLE
-  - NOLOGIN
