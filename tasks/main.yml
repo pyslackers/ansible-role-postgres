@@ -23,28 +23,18 @@
     - python3-passlib
     - autopostgresqlbackup
 
-- name: "create database users"
-  become: true
-  become_user: postgres
-  postgresql_user:
-    name: "{{ item.key }}"
-    password: "{{ item.value.password }}"
-    role_attr_flags: "{{ item.value.roles | default(postgres_default_roles) | join(',') }}"
-    state: present
-  with_dict: "{{ postgres_users }}"
-
 - name: generate locales
   locale_gen:
     name: "{{ postgres_locale }}"
   register: gen_locale
 
-- name: restart postgres for local
+- name: restart postgres for locale
   systemd:
     name: postgresql.service
     state: restarted
   when: gen_locale.changed
 
-- name: "create databases"
+- name: create databases
   become: true
   become_user: postgres
   postgresql_db:
@@ -53,8 +43,18 @@
     lc_collate: "{{ postgres_locale }}"
     lc_ctype: "{{ postgres_locale }}"
     state: present
-    owner: "{{ item.key }}"
     template: template0
+  with_dict: "{{ postgres_users }}"
+
+- name: create database users
+  become: true
+  become_user: postgres
+  postgresql_user:
+    name: "{{ item.key }}"
+    db: "{{ item.value.database | default(item.key) }}"
+    password: "{{ item.value.password }}"
+    role_attr_flags: "{{ item.value.roles | default(postgres_default_roles) | join(',') }}"
+    state: present
   with_dict: "{{ postgres_users }}"
 
 - name: enable postgres
