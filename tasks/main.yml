@@ -1,7 +1,7 @@
 ---
 - name: add postgres apt repository
   apt_repository:
-    repo: "deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main"
+    repo: "deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main"
   when: ansible_distribution == 'Ubuntu'
 
 - name: add postgres apt key
@@ -18,7 +18,6 @@
     - postgresql-9.6
     - postgresql-client-9.6
     - postgresql-contrib-9.6
-    - pgtop
     - python3-psycopg2
     - python3-passlib
     - autopostgresqlbackup
