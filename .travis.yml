@@ -11,21 +11,22 @@ matrix:
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq python-apt
+  - sudo /etc/init.d/postgresql stop
 
 install:
   - pip install ansible ansible-lint
   - pip --version
   - python --version
   - ansible --version
-  - "printf '[defaults]\nroles_path = ../\nremote_tmp = ./tmp' > ansible.cfg"
+  - "printf '[defaults]\nroles_path = ../' > ansible.cfg"
   - mkdir -p ./tmp
 
 script:
   - ansible-lint tasks/main.yml
   - ansible-playbook -i tests/inventory --syntax-check --list-tasks tests/test.yml
-  - ansible-playbook -i tests/inventory --connection=local --sudo -vvvv tests/test.yml -u root
+  - ansible-playbook -i tests/inventory --connection=local --become -vvvv tests/test.yml -u root --skip-tags travis-exempt
   - >
-    ansible-playbook -i tests/inventory --connection=local --sudo -vvvv tests/test.yml -u root
+    ansible-playbook -i tests/inventory --connection=local --become -vvvv tests/test.yml -u root --skip-tags travis-exempt 
     | grep -q 'changed=0.*failed=0'
     && (echo 'Idempotence test: pass' && exit 0)
     || (echo 'Idempotence test: fail' && exit 1)

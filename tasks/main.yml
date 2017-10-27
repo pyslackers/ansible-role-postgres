@@ -1,7 +1,7 @@
 ---
 - name: add postgres apt repository
   apt_repository:
-    repo: "deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main"
+    repo: "deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main"
   when: ansible_distribution == 'Ubuntu'
 
 - name: add postgres apt key
@@ -15,13 +15,20 @@
     state: latest
     force: yes
   with_items:
-    - postgresql-9.6
-    - postgresql-client-9.6
-    - postgresql-contrib-9.6
-    - pgtop
-    - python3-psycopg2
-    - python3-passlib
-    - autopostgresqlbackup
+    - "postgresql-{{ postgres_version }}"
+    - "postgresql-contrib-{{ postgres_version }}"
+    - "postgresql-client-{{ postgres_version }}"
+    - python-psycopg2
+  tags: postgres-packages
+
+- name: install extra packages
+  apt:
+    pkg: "{{ item }}"
+    state: latest
+    force: yes
+  with_items: "{{ postgres_extra_packages }}"
+  when: postgres_extra_packages is defined
+  tags: postgres-extra
 
 - name: generate locales
   locale_gen:
@@ -33,6 +40,7 @@
     name: postgresql.service
     state: restarted
   when: gen_locale.changed
+  tags: travis-exempt
 
 - name: create databases
   become: true
@@ -44,7 +52,10 @@
     lc_ctype: "{{ postgres_locale }}"
     state: present
     template: template0
+  vars:
+    ansible_ssh_pipelining: true
   with_dict: "{{ postgres_users }}"
+  tags: postgres-create-db
 
 - name: create database users
   become: true
@@ -55,10 +66,14 @@
     password: "{{ item.value.password }}"
     role_attr_flags: "{{ item.value.roles | default(postgres_default_roles) | join(',') }}"
     state: present
+  vars:
+    ansible_ssh_pipelining: true
   with_dict: "{{ postgres_users }}"
+  tags: postgres-create-users
 
 - name: enable postgres
   systemd:
     enabled: yes
     name: postgresql.service
     state: started
+  tags: travis-exempt

@@ -1,5 +1,6 @@
-Role Name
+ansible-role-postgres
 =========
+[![travis](https://travis-ci.org/pyslackers/ansible-role-postgres.svg?branch=master)](https://travis-ci.org/pyslackers/ansible-role-postgres)
 
 A brief description of the role goes here.
 
