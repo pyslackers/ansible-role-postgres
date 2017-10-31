@@ -1,11 +1,6 @@
 ---
 postgres_version: 9.6
 postgres_locale: en_US.UTF-8
-postgres_extra_packages:
-  - python3-psycopg2
-  - python3-passlib
-  - pgtop
-  - autopostgresqlbackup
 # The roles a user will get by default if the
 # play doesn't define them.
 postgres_default_roles:

@@ -1,4 +1,9 @@
 ---
+postgres_extra_packages:
+  - python3-psycopg2
+  - python3-passlib
+  - pgtop
+  - autopostgresqlbackup
 postgres_users:
   sirbot:
     password: foobar123
