@@ -36,11 +36,10 @@
   register: gen_locale
 
 - name: restart postgres for locale
-  systemd:
-    name: postgresql.service
+  service:
+    name: postgresql
     state: restarted
   when: gen_locale.changed
-  tags: travis-exempt
 
 - name: create databases
   become: true
@@ -52,10 +51,7 @@
     lc_ctype: "{{ postgres_locale }}"
     state: present
     template: template0
-  vars:
-    ansible_ssh_pipelining: true
   with_dict: "{{ postgres_users }}"
-  tags: postgres-create-db
 
 - name: create database users
   become: true
@@ -66,14 +62,10 @@
     password: "{{ item.value.password }}"
     role_attr_flags: "{{ item.value.roles | default(postgres_default_roles) | join(',') }}"
     state: present
-  vars:
-    ansible_ssh_pipelining: true
   with_dict: "{{ postgres_users }}"
-  tags: postgres-create-users
 
 - name: enable postgres
-  systemd:
+  service:
     enabled: yes
-    name: postgresql.service
+    name: postgresql
     state: started
-  tags: travis-exempt
