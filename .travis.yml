@@ -1,25 +1,25 @@
 ---
 language: python
-
 python: "3.6"
-
 sudo: required
-
 matrix:
   fast_finish: true
-
 before_install:
+  # Remove the PostgreSQL installed by Travis
+  - sudo apt-get purge pgdg-keyring '^postgresql.*' -y
+  - sudo apt-get autoremove -y -qq
+  - sudo rm -rf /etc/postgresql
+  - sudo rm -rf /var/lib/postgresql
+  - sudo rm -f /etc/apt/sources.list.d/pgdg-source.list
+  # Install Updates
   - sudo apt-get update -qq
   - sudo apt-get install -qq python-apt
-  - sudo /etc/init.d/postgresql stop
-
 install:
   - pip install ansible ansible-lint
   - pip --version
   - python --version
   - ansible --version
   - "printf '[defaults]\nroles_path = ../' > ansible.cfg"
-  - mkdir -p ./tmp
 
 script:
   - ansible-lint tasks/main.yml
