@@ -64,5 +64,6 @@
     password: "{{ item.value.password }}"
     role_attr_flags: "{{ item.value.roles | default(postgres_default_roles) | join(',') }}"
     state: present
+    encrypted: yes
   with_dict: "{{ postgres_users }}"
   when: postgres_users is defined
