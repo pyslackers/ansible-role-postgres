@@ -1,13 +1,14 @@
 ---
-- name: add postgres apt repository
-  apt_repository:
-    repo: "deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main"
-  when: ansible_distribution == 'Ubuntu'
-
 - name: add postgres apt key
   apt_key:
     url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
-  when: ansible_distribution == 'Ubuntu'
+  when: ansible_distribution in ('Ubuntu', 'Debian')
+
+- name: add postgres apt repository
+  apt_repository:
+    repo: "deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main"
+    update_cache: yes
+  when: ansible_distribution in ('Ubuntu', 'Debian')
 
 - name: install packages
   apt:
@@ -52,8 +53,9 @@
     state: present
     template: template0
   with_dict: "{{ postgres_users }}"
+  when: postgres_users is defined
 
-- name: create database users
+- name: create users
   become: true
   become_user: postgres
   postgresql_user:
@@ -63,9 +65,4 @@
     role_attr_flags: "{{ item.value.roles | default(postgres_default_roles) | join(',') }}"
     state: present
   with_dict: "{{ postgres_users }}"
-
-- name: enable postgres
-  service:
-    enabled: yes
-    name: postgresql
-    state: started
+  when: postgres_users is defined
