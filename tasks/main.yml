@@ -8,6 +8,7 @@
   apt_repository:
     repo: "deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main"
     update_cache: yes
+    state: present
   when: ansible_distribution in ('Ubuntu', 'Debian')
 
 - name: install packages
@@ -20,6 +21,7 @@
     - "postgresql-contrib-{{ postgres_version }}"
     - "postgresql-client-{{ postgres_version }}"
     - python-psycopg2
+    - python3-psycopg2
   tags: postgres-packages
 
 - name: install extra packages
