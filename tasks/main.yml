@@ -47,6 +47,7 @@
 - name: create databases
   become: true
   become_user: postgres
+  no_log: true
   postgresql_db:
     name: "{{ item.value.database | default(item.key) }}"
     encoding: UTF-8
@@ -60,6 +61,7 @@
 - name: create users
   become: true
   become_user: postgres
+  no_log: true
   postgresql_user:
     name: "{{ item.key }}"
     db: "{{ item.value.database | default(item.key) }}"
