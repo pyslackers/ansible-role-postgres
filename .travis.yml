@@ -1,32 +1,28 @@
 ---
-language: python
-python: "3.6"
-sudo: required
-matrix:
-  fast_finish: true
-before_install:
-  # Remove the PostgreSQL installed by Travis
-  - sudo apt-get purge pgdg-keyring '^postgresql.*' -y
-  - sudo apt-get autoremove -y -qq
-  - sudo rm -rf /etc/postgresql
-  - sudo rm -rf /var/lib/postgresql
-  - sudo rm -f /etc/apt/sources.list.d/pgdg-source.list
-  # Install Updates
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq python-apt
+services: docker
+
+env:
+  - distro=debian8
+  - distro=debian9
+  - distro=ubuntu1604
+
 install:
-  - pip install ansible ansible-lint
-  - pip --version
-  - python --version
-  - ansible --version
+  - export container_id=$(date +%s)
+  - idempotence=$(mktemp)
   - "printf '[defaults]\nroles_path = ../' > ansible.cfg"
 
+  # Build and run docker container
+  - docker pull geerlingguy/docker-$distro-ansible:latest
+  - docker run --detach --volume="$(dirname "$TRAVIS_BUILD_DIR")":/etc/ansible/roles:rw --name $container_id --privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro geerlingguy/docker-$distro-ansible:latest /lib/systemd/systemd
+  - docker exec --tty ${container_id} env TERM=xterm apt-get update -qq
+  - docker ps
+
 script:
-  - ansible-lint tasks/main.yml
-  - ansible-playbook -i tests/inventory --syntax-check --list-tasks tests/test.yml
-  - ansible-playbook -i tests/inventory --connection=local --become -vvvv tests/test.yml -u root --skip-tags travis-exempt
-  - >
-    ansible-playbook -i tests/inventory --connection=local --become -vvvv tests/test.yml -u root --skip-tags travis-exempt 
-    | grep -q 'changed=0.*failed=0'
-    && (echo 'Idempotence test: pass' && exit 0)
-    || (echo 'Idempotence test: fail' && exit 1)
+  # Run playbook.
+  - docker exec --tty $container_id env TERM=xterm ansible-playbook /etc/ansible/roles/ansible-role-postgres/tests/test.yml --syntax-check
+  - docker exec $container_id env TERM=xterm env ANSIBLE_FORCE_COLOR=1 ansible-playbook /etc/ansible/roles/ansible-role-postgres/tests/test.yml -vvv
+  - docker exec $container_id ansible-playbook /etc/ansible/roles/ansible-role-postgres/tests/test.yml | tee -a $idempotence
+  - tail $idempotence | grep -q 'changed=0.*failed=0' && (printf 'Idempotence test pass') || (printf 'Idempotence test fail' && exit 1)
+
+  - docker exec $container_id su postgres -c "psql -lAt" | grep "pyslackers-website|postgres|UTF8|en_US.UTF-8|en_US.UTF-8|"
+  - docker exec $container_id su postgres -c "psql -lAt" | grep "sirbot|postgres|UTF8|en_US.UTF-8|en_US.UTF-8|"

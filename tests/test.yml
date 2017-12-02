@@ -1,6 +1,16 @@
 ---
 - hosts: localhost
-  vars_files:
-    - example-vars.yml
+  vars:
+    postgres_extra_packages:
+      - pgtop
+      - autopostgresqlbackup
+    postgres_users:
+      sirbot:
+        password: foobar123
+      pyslackers-website:
+        password: baz1234
+        roles:
+          - 'NOSUPERUSER'
+          - 'NOCREATEDB'
   roles:
     - ansible-role-postgres
