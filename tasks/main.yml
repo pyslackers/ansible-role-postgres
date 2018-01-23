@@ -53,6 +53,15 @@
     state: restarted
   when: gen_locale.changed
 
+- name: configure postgres
+  template:
+    src: "{{ item.src }}"
+    dest: "/etc/postgresql/{{ postgres_version }}/{{ item.name }}"
+  with_items:
+    - {src: "{{ postgres_conf_template }}", name: postgresql.conf}
+    - {src: "{{ postgres_hba_conf_template }}", name: pg_hba.conf}
+  notify: restart postgresql
+
 - name: create databases
   become: true
   become_user: postgres

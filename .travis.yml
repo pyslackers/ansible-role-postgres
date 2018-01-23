@@ -26,3 +26,7 @@ script:
 
   - docker exec $container_id su postgres -c "psql -lAt" | grep "pyslackers-website|postgres|UTF8|en_US.UTF-8|en_US.UTF-8|"
   - docker exec $container_id su postgres -c "psql -lAt" | grep "sirbot|postgres|UTF8|en_US.UTF-8|en_US.UTF-8|"
+  - docker exec $container_id cat /etc/postgresql/10/postgresql.conf | grep 'port = 5454'
+  - docker exec $container_id cat /etc/postgresql/10/postgresql.conf | grep "listen_addresses = '*'"
+  - docker exec $container_id cat /etc/postgresql/10/pg_hba.conf | grep 'sirbot'
+  - docker exec $container_id cat /etc/postgresql/10/pg_hba.conf | grep 'pyslackers-website'
