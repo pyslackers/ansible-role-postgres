@@ -42,9 +42,6 @@ Role Variables
     * `peer`: Default to `md5`.
     * `type`: Default to `host`.
 
-* `postgres_conf_template`: Template for generating `postgresql.conf` (default to `etc/postgresql/10/postgresql.conf`).
-* `postgres_hba_conf_template`: Template for generating `pg_hba.conf` (default to `etc/postgresql/10/ph_hba.conf`).
-
 Example Playbook
 ----------------
 
