@@ -1,6 +1,8 @@
 ---
 - hosts: localhost
   vars:
+    postgres_listen_address: '127.0.0.1'
+    postgres_listen_port: '5555'
     postgres_extra_packages:
       - pgtop
       - autopostgresqlbackup
@@ -12,8 +14,9 @@
         roles:
           - 'NOSUPERUSER'
           - 'NOCREATEDB'
-    postgres_listen_address: '*'
-    postgres_listen_port: 5454
+        privileges:
+          - {type: database, privileges: ['CREATE']}
+          - {type: schema, privileges: ['CREATE'], objs: ['public'], state: absent}
     postgres_clients:
       - {db: sirbot, user: sirbot}
       - {db: pyslackers-website, user: pyslackers-website, address: 0.0.0.0/0, peer: trust}

@@ -1,0 +1,15 @@
+---
+
+- name: set database privileges
+  become: true
+  become_user: postgres
+  postgresql_privs:
+    db: "{{ postgres_user.value.database | default(postgres_user.key) }}"
+    roles: "{{ postgres_user.key }}"
+    privs: "{{ item.privileges | join(',') }}"
+    type: "{{ item.type }}"
+    objs: "{{ item.objs | default([]) | join(',') }}"
+    state: "{{ item.state | default('present') }}"
+    port: "{{ postgres_listen_port }}"
+  with_items: "{{ postgres_user.value.privileges }}"
+  when: postgres_user.value.privileges is defined

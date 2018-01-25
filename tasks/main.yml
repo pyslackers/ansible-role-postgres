@@ -45,27 +45,29 @@
 - name: generate locales
   locale_gen:
     name: "{{ postgres_locale }}"
-  register: gen_locale
-
-- name: restart postgres for locale
-  service:
-    name: postgresql
-    state: restarted
-  when: gen_locale.changed
+  register: postgres_gen_locale
 
 - name: configure postgres
   template:
     src: "{{ item.src }}"
-    dest: "/etc/postgresql/{{ postgres_version }}/{{ item.name }}"
+    dest: "/etc/postgresql/{{ postgres_version }}/main/{{ item.name }}"
+    owner: postgres
+    group: postgres
   with_items:
     - {src: "{{ postgres_conf_template }}", name: postgresql.conf}
     - {src: "{{ postgres_hba_conf_template }}", name: pg_hba.conf}
-  notify: restart postgresql
+  register: postgres_config
+
+- name: restart postgres
+  systemd:
+    name: postgresql
+    state: restarted
+  when: postgres_gen_locale.changed or postgres_config.changed
 
 - name: create databases
   become: true
   become_user: postgres
-  no_log: true
+#  no_log: true
   postgresql_db:
     name: "{{ item.value.database | default(item.key) }}"
     encoding: UTF-8
@@ -73,6 +75,7 @@
     lc_ctype: "{{ postgres_locale }}"
     state: present
     template: template0
+    port: "{{ postgres_listen_port }}"
   with_dict: "{{ postgres_users }}"
   when: postgres_users is defined
 
@@ -87,5 +90,13 @@
     role_attr_flags: "{{ item.value.roles | default(postgres_default_roles) | join(',') }}"
     state: present
     encrypted: yes
+    port: "{{ postgres_listen_port }}"
   with_dict: "{{ postgres_users }}"
+  when: postgres_users is defined
+
+- name: database privileges
+  include_tasks: privileges.yml
+  with_dict: "{{ postgres_users }}"
+  loop_control:
+    loop_var: postgres_user
   when: postgres_users is defined
