@@ -9,6 +9,7 @@ postgres_default_roles:
   - NOCREATEROLE
 
 postgres_listen_address: localhost
+postgres_listen_port: 5432
 postgres_clients: {}
 
 postgres_conf_template: etc/postgresql/10/main/postgresql.conf  # Template for generating `postgresql.conf`.

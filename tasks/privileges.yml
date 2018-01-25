@@ -10,5 +10,6 @@
     type: "{{ item.type }}"
     objs: "{{ item.objs | default([]) | join(',') }}"
     state: "{{ item.state | default('present') }}"
+    port: "{{ postgres_listen_port }}"
   with_items: "{{ postgres_user.value.privileges }}"
   when: postgres_user.value.privileges is defined

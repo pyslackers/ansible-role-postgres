@@ -26,12 +26,13 @@ script:
 
   - docker exec $container_id su postgres -c "psql -lAt" | grep "pyslackers-website|postgres|UTF8|en_US.UTF-8|en_US.UTF-8|"
   - docker exec $container_id su postgres -c "psql -lAt" | grep "sirbot|postgres|UTF8|en_US.UTF-8|en_US.UTF-8|"
-  - docker exec $container_id su postgres -c "psql pyslackers-website -c '\l pyslackers-website'" | grep 'pyslackers-website=C/postgres'
-  - docker exec $container_id cat /etc/postgresql/10/main/postgresql.conf | grep 'port = 5454'
-  - docker exec $container_id cat /etc/postgresql/10/main/postgresql.conf | grep "listen_addresses = '*'"
+  - docker exec $container_id su postgres -c "psql pyslackers-website -c '\l pyslackers-website'" | grep '"pyslackers-website"=C/postgres'
+  - docker exec $container_id cat /etc/postgresql/10/main/postgresql.conf | grep 'port = 5555'
+  - docker exec $container_id cat /etc/postgresql/10/main/postgresql.conf | grep "listen_addresses = '127.0.0.1'"
   - docker exec $container_id cat /etc/postgresql/10/main/pg_hba.conf | grep 'sirbot'
   - docker exec $container_id cat /etc/postgresql/10/main/pg_hba.conf | grep 'pyslackers-website'
 
   - docker exec --tty ${container_id} env TERM=xterm journalctl -u postgresql.service -n 200 --no-pager
   - docker exec --tty ${container_id} env TERM=xterm ls -la /var/run/postgresql
   - docker exec --tty ${container_id} env TERM=xterm cat /etc/postgresql/10/main/postgresql.conf
+  - docker exec --tty ${container_id} env TERM=xterm cat /var/log/postgresql/postgresql-10-main.log
