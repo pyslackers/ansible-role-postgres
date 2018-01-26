@@ -34,6 +34,11 @@ Role Variables
     * `password`: User password.
     * `roles`: User roles (use `postgres_default_roles` if not set).
     * `database`: Name of database to create (default to the user name).
+    * `privileges`: List of Postgres privileges for this role (optional).
+        * `type`: Type of database object to set privileges on.
+        * `privileges`: List of privileges.
+        * `objs`: Lift of Object on which to apply the privileges.
+        * `state`: One of `present`, `absent` (default to `present`).
 
 * `postgres_clients`: List of clients allowed to connect.
     * `db`: Required.
@@ -48,11 +53,25 @@ Example Playbook
 ```yml
 - hosts: localhost
   vars:
+    postgres_listen_address: '127.0.0.1'
+    postgres_listen_port: '5555'
     postgres_extra_packages:
       - pgtop
+      - autopostgresqlbackup
     postgres_users:
-      test:
-        password: PaSSw0rd
+      sirbot:
+        password: foobar123
+      pyslackers-website:
+        password: baz1234
+        roles:
+          - 'NOSUPERUSER'
+          - 'NOCREATEDB'
+        privileges:
+          - {type: database, privileges: ['CREATE']}
+          - {type: schema, privileges: ['CREATE'], objs: ['public'], state: absent}
+    postgres_clients:
+      - {db: sirbot, user: sirbot}
+      - {db: pyslackers-website, user: pyslackers-website, address: 0.0.0.0/0, peer: trust}
   roles: 
     - pyslackers.postgres
 ```
