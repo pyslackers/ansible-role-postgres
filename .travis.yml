@@ -37,4 +37,4 @@ script:
   - docker exec --tty ${container_id} env TERM=xterm journalctl -u postgresql.service -n 200 --no-pager
   - docker exec --tty ${container_id} env TERM=xterm ls -la /var/run/postgresql
   - docker exec --tty ${container_id} env TERM=xterm cat /etc/postgresql/10/main/postgresql.conf
-  - docker exec --tty ${container_id} env TERM=xterm cat /var/log/postgresql/postgresql-10-main.log
+  - docker exec --tty ${container_id} env TERM=xterm cat /var/log/postgresql/postgresql-$postgres_version-main.log
