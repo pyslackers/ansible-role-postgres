@@ -35,6 +35,6 @@ script:
   - docker exec $container_id cat /etc/postgresql/$postgres_version/main/pg_hba.conf | grep 'pyslackers-website'
 
   - docker exec --tty ${container_id} env TERM=xterm journalctl -u postgresql.service -n 200 --no-pager
-  - docker exec --tty ${container_id} env TERM=xterm ls -la /var/run/postgresql | grep '$postgres_version-main.pid'
+  - docker exec --tty ${container_id} env TERM=xterm ls -la /var/run/postgresql | grep $postgres_version
   - docker exec --tty ${container_id} env TERM=xterm cat /etc/postgresql/$postgres_version/main/postgresql.conf
   - docker exec --tty ${container_id} env TERM=xterm cat /var/log/postgresql/postgresql-$postgres_version-main.log
