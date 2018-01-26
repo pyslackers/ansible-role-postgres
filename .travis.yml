@@ -6,6 +6,10 @@ env:
   - distro=debian9
   - distro=ubuntu1604
 
+env:
+  - postgres_version=10
+  - postgres_version=9.6
+
 install:
   - export container_id=$(date +%s)
   - idempotence=$(mktemp)
