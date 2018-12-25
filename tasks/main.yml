@@ -2,11 +2,10 @@
 
 - name: Requirements
   apt:
-    pkg: "{{ item }}"
+    pkg:
+      - gnupg2
+      - apt-transport-https
     state: latest
-  with_items:
-    - gnupg2
-    - apt-transport-https
 
 - name: Postgres apt key
   apt_key:
@@ -22,23 +21,22 @@
 
 - name: install packages
   apt:
-    pkg: "{{ item }}"
+    pkg:
+      - "postgresql-{{ postgres_version }}"
+      - "postgresql-contrib-{{ postgres_version }}"
+      - "postgresql-client-{{ postgres_version }}"
+      - python-psycopg2
+      - python3-psycopg2
     state: latest
     force: yes
-  with_items:
-    - "postgresql-{{ postgres_version }}"
-    - "postgresql-contrib-{{ postgres_version }}"
-    - "postgresql-client-{{ postgres_version }}"
-    - python-psycopg2
-    - python3-psycopg2
+
   tags: postgres-packages
 
 - name: install extra packages
   apt:
-    pkg: "{{ item }}"
+    pkg: "{{ postgres_extra_packages }}"
     state: latest
     force: yes
-  with_items: "{{ postgres_extra_packages }}"
   when: postgres_extra_packages is defined
   tags: postgres-extra
 
